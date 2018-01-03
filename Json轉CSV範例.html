@@ -1,0 +1,86 @@
+﻿<html>
+<head>
+	<title>Json轉CSV</title>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script>
+		function JSONToCSVConvertor(JSONData, FileName, ShowLabel) {
+            var result = "";
+            //如果資料不為Obj時就轉換成JSON字串
+            var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+            var CSV = '';
+
+            //是否產生標籤/標題
+            if (ShowLabel) {
+                var row = "";
+                //迴圈提取項目
+                for (var index in arrData[0]) {
+                    row += index + ',';
+                }
+
+                row = row.slice(0, -1);//提取所有文字
+
+                //加入換行符號
+                CSV += row + '\r\n';
+            }
+
+            //讀取資料行
+            for (var i = 0; i < arrData.length; i++) {
+                var row = "";
+
+                //讀取資料列
+                for (var index in arrData[i]) {
+                    row += '"' + arrData[i][index] + '",';
+                }
+
+                row.slice(0, row.length - 1);//提取文字 範圍:0 ~ 資料行長度-1
+
+                //換行
+                CSV += row + '\r\n';
+            }
+
+            if (CSV == '') {
+                alert("沒有資料。");
+                return;
+            }
+
+            //對文字進行編碼 並轉成URI
+            const MIME_TYPE = 'text/csv;charset=utf-8';
+
+            var blob = new Blob(["\uFEFF" + CSV], {
+                type: MIME_TYPE
+            });
+
+            var uri = window.URL.createObjectURL(blob);
+
+            //建立一個<a>標籤
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //設定標籤<a>隱藏以及下載檔案
+            link.style = "visibility:hidden";
+            link.download = FileName + ".csv";
+
+            //程式點擊下載
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);//刪除<a>標籤
+        }
+		
+		$(function(){
+			$("#bntDownload").on("click", function(){
+				var data = $("#JsonData").val();
+				JSONToCSVConvertor(data,"Json轉CSV範例",true);
+			});
+		});
+	</script>
+<head>
+<body>
+	<div>
+		<textarea id="JsonData" rows="3" style="width:500px;height:400px;">
+[{"車輛":"BMW","日期":"30, Jul 2013 09:24 AM","位置":"Hauz Khas, Enclave, New Delhi, Delhi, India","速度":42},{"車輛":"Honda CBR","日期":"30, Jul 2013 12:00 AM","位置":"Military Road,  West Bengal 734013,  India","速度":0},{"車輛":"Supra","日期":"30, Jul 2013 07:53 AM","位置":"Sec-45, St. Angel's School, Gurgaon, Haryana, India","速度":58},{"車輛":"Land Cruiser","日期":"30, Jul 2013 09:35 AM","位置":"DLF Phase I, Marble Market, Gurgaon, Haryana, India","速度":83},{"車輛":"Suzuki Swift","日期":"30, Jul 2013 12:02 AM","位置":"Behind Central Bank RO, Ram Krishna Rd by-lane, Siliguri, West Bengal, India","速度":0},{"車輛":"Honda Civic","日期":"30, Jul 2013 12:00 AM","位置":"Behind Central Bank RO, Ram Krishna Rd by-lane, Siliguri, West Bengal, India","速度":0},{"車輛":"Honda Accord","日期":"30, Jul 2013 11:05 AM","位置":"DLF Phase IV, Super Mart 1, Gurgaon, Haryana, India","速度":71}]
+		</textarea>
+		<button id="bntDownload">下載</button>
+	<div>
+</body>
+</html>
